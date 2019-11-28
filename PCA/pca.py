@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from PIL import Image
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def generate_data(dim=3, size=100):
@@ -56,18 +58,23 @@ def calc_snr(source, target):
 
 
 def test(path='./Japanese'):
+    data = []
     for i in range(1, 24):
         new_path = path + '/' + str(i) + '.tiff'
-        img = np.array(Image.open(new_path).convert('L'), 'f').astype(np.float)
-        mean, centered_data, w = pca(img, 20)
+        img = np.array(Image.open(new_path).resize((50, 50)).convert('L'), 'f').astype(np.float).flatten()
+        data.append(img)
         # w = np.array(w, dtype=np.uint32)
-        pca_data = recover_data(w, centered_data, mean)
-        pca_data[pca_data < 0] = 0
-        # print(pca_data)
-        pca_data = pca_data.astype(np.uint8)
-        new_image = Image.fromarray(pca_data, mode='L')
+    data = np.array(data).reshape(23, -1)
+    mean, centered_data, w = pca(data, 10)
+    pca_data = recover_data(w, centered_data, mean)
+    pca_data[pca_data < 0] = 0
+    # print(pca_data)
+    pca_data = pca_data.astype(np.uint8)
+    for i in range(1, 24):
+        new_data = pca_data[i - 1].reshape(50, 50)
+        new_image = Image.fromarray(new_data, mode='L')
         new_image.save(path + '/' + str(i) + '_.tiff')
-        print('image {}: snr = {}'.format(i, calc_snr(pca_data, img)))
+        print('image {}: snr = {}'.format(i, calc_snr(data[i - 1].flatten(), new_data.flatten())))
 
 
 if __name__ == '__main__':
