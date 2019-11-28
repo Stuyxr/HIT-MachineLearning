@@ -7,7 +7,7 @@ from PIL import Image
 def generate_data(dim=3, size=100):
     if dim == 2:
         mean = [1, 2]
-        cov = [[2, 1], [1, 2]]
+        cov = [[0.1, 0], [0, 2]]
     if dim == 3:
         mean = [1, 2, 3]
         cov = [[0.1, 0, 0], [0, 3, 0], [0, 0, 3]]
@@ -59,7 +59,7 @@ def test(path='./Japanese'):
     for i in range(1, 24):
         new_path = path + '/' + str(i) + '.tiff'
         img = np.array(Image.open(new_path).convert('L'), 'f').astype(np.float)
-        mean, centered_data, w = pca(img, 15)
+        mean, centered_data, w = pca(img, 20)
         # w = np.array(w, dtype=np.uint32)
         pca_data = recover_data(w, centered_data, mean)
         pca_data[pca_data < 0] = 0
@@ -71,8 +71,8 @@ def test(path='./Japanese'):
 
 
 if __name__ == '__main__':
-    # data = generate_data(dim=2)
-    # mean, centered_data, w = pca(data, reduced_dim=1)
+    # data = generate_data(dim=3)
+    # mean, centered_data, w = pca(data, reduced_dim=2)
     # pca_data = np.dot(np.dot(centered_data, w), w.T) + mean
     # plot(data, pca_data)
     test()
